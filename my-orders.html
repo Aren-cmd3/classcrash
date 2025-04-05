@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Class Craft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="header-notification.css">
+    <style>
+        .order-tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .order-tab {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 25px;
+            text-align: center;
+            flex: 1;
+            min-width: 140px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            border-top: 4px solid #f4e2d8;
+        }
+
+        .order-tab.active {
+            background: #fff5f5;
+            border-top-color: #b1464a;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(177, 70, 74, 0.15);
+        }
+
+        .order-tab:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-tab .tab-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+            color: #b1464a;
+        }
+
+        .order-tab .count-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #b1464a;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(177, 70, 74, 0.3);
+        }
+
+        .order-content {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-height: 300px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .order-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f4e2d8;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .order-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 0 -20px;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-image {
+            width: 100px;
+
+        /* Admin controls styling */
+        .admin-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            position: relative;
+            padding: 15px;
+            background: #f9f5f5;
+            border-radius: 15px;
+            border-left: 4px solid #b1464a;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .admin-controls::before {
+            content: "👑 Admin Actions";
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: #b1464a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(177, 70, 74, 0.3);
+        }
+        
+        .admin-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-btn.process {
+            background: linear-gradient(145deg, #5fd364, #4CAF50);
+            color: white;
+        }
+        
+        .admin-btn.reject {
+            background: linear-gradient(145deg, #f65246, #f44336);
+            color: white;
+        }
+        
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .admin-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-btn i {
+            font-size: 16px;
+        }
+        
+        .status-update-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .order-item:hover .order-image {
+            transform: scale(1.05);
+        }
+
+        .order-details {
+            flex: 1;
+        }
+
+        .order-details h3 {
+            color: #6b4f4f;
+            margin-bottom: 10px;
+        }
+
+        .order-date {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .order-price {
+            color: #b1464a;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(177, 70, 74, 0.1);
+            color: #b1464a;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .order-action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #f4e2d8;
+            color: #6b4f4f;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .order-action-btn:hover {
+            background: #b1464a;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+
+        .empty-orders i {
+            font-size: 48px;
+            color: #f4e2d8;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .empty-orders .shop-now-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #b1464a;
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .empty-orders .shop-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(177, 70, 74, 0.3);
+        }
+
+        .orders-page-title {
+            color: #6b4f4f;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .orders-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: #b1464a;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .order-tabs {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 15px;
+                justify-content: flex-start;
+            }
+
+            .order-tab {
+                min-width: 120px;
+                padding: 15px;
+            }
+
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-image {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Receipt Modal Styles */
+        #receipt-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        #receipt-modal .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        #receipt-modal .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #receipt-modal .close:hover,
+        #receipt-modal .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .receipt-item-left img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .receipt-item-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .item-quantity {
+            font-size: 14px;
+            color: #888;
+        }
+
+        #receipt-to-print {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="Logop.png" alt="Logo" width="60" height="60" />
+        <div class="logo">Class Craft</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="index2.html">SHOP</a></li>
+                <li><a href="about.html">ABOUT US</a></li>
+                <li><a href="index4.html" id="cart-link">CART <span class="cart-count">0</span></a></li>
+                <li>
+                    <a href="dashboard.html" class="active" style="background: #b1464a; color: white;">DASHBOARD</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="dashboard-wrapper">
+        <h1 class="orders-page-title">My Orders</h1>
+
+        <div class="order-tabs">
+            <div class="order-tab active" data-tab="all">
+                <span class="tab-icon"><i class="fas fa-shopping-bag"></i></span>
+                <span>All Orders</span>
+                <span class="count-badge" id="all-count">0</span>
+            </div>
+            <div class="order-tab" data-tab="to-ship">
+                <span class="tab-icon"><i class="fas fa-box"></i></span>
+                <span>To Ship</span>
+                <span class="count-badge" id="to-ship-count">0</span>
+            </div>
+            <div class="order-tab" data-tab="to-receive">
+                <span class="tab-icon"><i class="fas fa-shipping-fast"></i></span>
+                <span>To Receive</span>
+                <span class="count-badge" id="to-receive-count">0</span>
+            </div>
+            <div class="order-tab" data-tab="delivered">
+                <span class="tab-icon"><i class="fas fa-check-circle"></i></span>
+                <span>Delivered</span>
+                <span class="count-badge" id="delivered-count">0</span>
+            </div>
+            <div class="order-tab" data-tab="cancelled">
+                <span class="tab-icon"><i class="fas fa-times-circle"></i></span>
+                <span>Cancelled</span>
+                <span class="count-badge" id="cancelled-count">0</span>
+            </div>
+        </div>
+
+        <!-- All Orders Tab Content -->
+        <div class="order-content active" id="all-orders">
+            <!-- Orders will be loaded here by JavaScript -->
+        </div>
+
+        <!-- To Ship Tab Content -->
+        <div class="order-content" id="to-ship-orders">
+            <!-- To Ship orders will be loaded here by JavaScript -->
+        </div>
+
+        <!-- To Receive Tab Content -->
+        <div class="order-content" id="to-receive-orders">
+            <!-- To Receive orders will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Delivered Tab Content -->
+        <div class="order-content" id="delivered-orders">
+            <!-- Delivered orders will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Cancelled Tab Content -->
+        <div class="order-content" id="cancelled-orders">
+            <!-- Cancelled orders will be loaded here by JavaScript -->
+        </div>
+        
+        <!-- Admin Controls (visible only to admins) -->
+        <div id="admin-dashboard" style="display: none; margin: 30px 0; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+            <h2 style="color: #b1464a; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-crown" style="color: gold;"></i> Admin Dashboard
+            </h2>
+            <p style="color: #6b4f4f; margin-bottom: 20px;">Manage customer orders and update order statuses.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: center; border-top: 3px solid #4CAF50;">
+                    <i class="fas fa-box" style="font-size: 24px; color: #4CAF50; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 0;">Processing</h3>
+                    <p id="processing-count" style="font-size: 24px; font-weight: bold; color: #4CAF50;">0</p>
+                </div>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: center; border-top: 3px solid #2196F3;">
+                    <i class="fas fa-shipping-fast" style="font-size: 24px; color: #2196F3; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 0;">In Transit</h3>
+                    <p id="transit-count" style="font-size: 24px; font-weight: bold; color: #2196F3;">0</p>
+                </div>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: center; border-top: 3px solid #8BC34A;">
+                    <i class="fas fa-check-circle" style="font-size: 24px; color: #8BC34A; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 0;">Delivered</h3>
+                    <p id="delivered-admin-count" style="font-size: 24px; font-weight: bold; color: #8BC34A;">0</p>
+                </div>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: center; border-top: 3px solid #F44336;">
+                    <i class="fas fa-times-circle" style="font-size: 24px; color: #F44336; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 0;">Cancelled</h3>
+                    <p id="cancelled-admin-count" style="font-size: 24px; font-weight: bold; color: #F44336;">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>@2025 Class Craft</p>
+        <div class="footer-links">
+            <a href="about.html" class="about-link">About Us</a>
+        </div>
+    </footer>
+
+    <script src="dashboard.js"></script>
+    <script src="header-notification.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+            const user = JSON.parse(localStorage.getItem('loggedInUser')) || { name: 'Guest' };
+            
+            // Check if user is admin
+            const isAdmin = user.isAdmin || false;
+            
+            // Show admin dashboard if admin
+            if (isAdmin) {
+                document.getElementById('admin-dashboard').style.display = 'block';
+                
+                // Count orders by status for admin dashboard
+                const adminStatusCounts = {
+                    'Processing': 0,
+                    'In Transit': 0,
+                    'Delivered': 0,
+                    'Cancelled': 0
+                };
+                
+                purchaseHistory.forEach(purchase => {
+                    if (adminStatusCounts[purchase.orderStatus] !== undefined) {
+                        adminStatusCounts[purchase.orderStatus]++;
+                    }
+                });
+                
+                // Update admin dashboard counters
+                document.getElementById('processing-count').textContent = adminStatusCounts['Processing'];
+                document.getElementById('transit-count').textContent = adminStatusCounts['In Transit'];
+                document.getElementById('delivered-admin-count').textContent = adminStatusCounts['Delivered'];
+                document.getElementById('cancelled-admin-count').textContent = adminStatusCounts['Cancelled'];
+            }
+
+            // Update last checked order status for notifications
+            const lastCheckedOrderStatus = {};
+            purchaseHistory.forEach((purchase, index) => {
+                lastCheckedOrderStatus[`order-${index}`] = purchase.orderStatus;
+            });
+            localStorage.setItem('lastCheckedOrderStatus', JSON.stringify(lastCheckedOrderStatus));
+
+            // Update cart count
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+            const cartLink = document.getElementById('cart-link');
+            if (cartLink) {
+                cartLink.innerHTML = `CART <span class="cart-count">${cartCount}</span>`;
+            }
+
+            // Map order statuses to tab IDs
+            const statusToTab = {
+                'Processing': 'to-ship',
+                'In Transit': 'to-receive',
+                'Delivered': 'delivered',
+                'Cancelled': 'cancelled'
+            };
+
+            // Count orders by status
+            const statusCounts = {
+                'all': 0,
+                'to-ship': 0,
+                'to-receive': 0,
+                'delivered': 0,
+                'cancelled': 0
+            };
+
+            // Track orders that have been processed to avoid duplicates
+            const processedOrders = new Set();
+            
+            // Load orders into respective tabs
+            purchaseHistory.forEach((purchase, purchaseIndex) => {
+                const tabId = statusToTab[purchase.orderStatus] || 'all';
+
+                // Increment counters
+                statusCounts['all']++;
+                statusCounts[tabId]++;
+
+                // Group all items from the same purchase
+                const orderContainer = document.createElement('div');
+                orderContainer.className = 'purchase-group';
+                orderContainer.dataset.orderId = purchaseIndex;
+                orderContainer.style.marginBottom = '30px';
+                orderContainer.style.padding = '15px';
+                orderContainer.style.background = '#fff';
+                orderContainer.style.borderRadius = '15px';
+                orderContainer.style.boxShadow = '0 5px 15px rgba(0,0,0,0.05)';
+                
+                // Add order header with order ID and date
+                const purchaseDate = new Date(purchase.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const orderHeader = document.createElement('div');
+                orderHeader.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f4e2d8; padding-bottom: 10px;">
+                        <div>
+                            <h3 style="margin: 0; color: #b1464a;">Order #${purchaseIndex + 1000}</h3>
+                            <p style="margin: 5px 0; color: #666;">Date: ${purchaseDate}</p>
+                        </div>
+                        <span class="order-status" style="font-size: 16px; padding: 8px 20px;">${purchase.orderStatus}</span>
+                    </div>
+                `;
+                orderContainer.appendChild(orderHeader);
+                
+                // Add items
+                purchase.items.forEach(item => {
+                    const itemElement = createOrderElement(item, purchase, purchaseDate, purchaseIndex);
+                    orderContainer.appendChild(itemElement);
+                });
+                
+                // Add admin controls ONCE per order (not per item)
+                if (isAdmin && !processedOrders.has(purchaseIndex)) {
+                    const adminControlsDiv = document.createElement('div');
+                    adminControlsDiv.className = 'admin-controls';
+                    
+                    // Add "Mark as In Transit" button for "Processing" items
+                    if (purchase.orderStatus === 'Processing') {
+                        adminControlsDiv.innerHTML += `
+                            <button class="admin-btn process" onclick="markAsInTransit(${purchaseIndex})">
+                                <i class="fas fa-shipping-fast"></i> Mark as In Transit
+                            </button>
+                        `;
+                    }
+                    
+                    // Add "Mark as Delivered" button for "In Transit" items
+                    if (purchase.orderStatus === 'In Transit') {
+                        adminControlsDiv.innerHTML += `
+                            <button class="admin-btn process" onclick="updateOrderStatus(${purchaseIndex})">
+                                <i class="fas fa-check"></i> Mark as Delivered
+                            </button>
+                        `;
+                    }
+                    
+                    // Add "Reject Order" button for orders not already cancelled
+                    if (purchase.orderStatus !== 'Cancelled') {
+                        adminControlsDiv.innerHTML += `
+                            <button class="admin-btn reject" onclick="rejectOrder(${purchaseIndex})">
+                                <i class="fas fa-times"></i> Reject Order
+                            </button>
+                        `;
+                    }
+                    
+                    orderContainer.appendChild(adminControlsDiv);
+                    
+                    // Mark this order as processed
+                    processedOrders.add(purchaseIndex);
+                }
+                
+                // Add to all orders tab
+                document.getElementById('all-orders').appendChild(orderContainer.cloneNode(true));
+
+                // Add to specific status tab
+                document.getElementById(`${tabId}-orders`).appendChild(orderContainer);
+            });
+
+            // Update counters in the UI
+            Object.keys(statusCounts).forEach(status => {
+                const countElement = document.getElementById(`${status}-count`);
+                if (countElement) {
+                    countElement.textContent = statusCounts[status];
+                }
+            });
+
+            // Show empty state if no orders
+            Object.keys(statusCounts).forEach(status => {
+                const contentElement = document.getElementById(`${status}-orders`);
+                if (contentElement && contentElement.children.length === 0) {
+                    contentElement.innerHTML = `
+                        <div class="empty-orders">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No ${status === 'all' ? '' : status + ' '}orders found</h3>
+                            <p>You haven't placed any orders yet.</p>
+                            <a href="index2.html" class="shop-now-btn">Shop Now</a>
+                        </div>
+                    `;
+                }
+            });
+
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.order-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+
+                    // Hide all tab contents
+                    document.querySelectorAll('.order-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Show the selected tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-orders`).classList.add('active');
+
+                    // Show notification when switching tabs
+                    showHeaderNotification({
+                        title: `${tabId.charAt(0).toUpperCase() + tabId.slice(1).replace('-', ' ')} Orders`,
+                        message: `Viewing your ${tabId.replace('-', ' ')} orders`,
+                        type: 'info',
+                        icon: '📦',
+                        duration: 3000
+                    });
+                });
+            });
+
+            // Function to create order element
+            function createOrderElement(item, purchase, purchaseDate, purchaseIndex) {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item';
+                orderDiv.dataset.orderId = purchaseIndex;
+                orderDiv.style.borderBottom = 'none';
+                orderDiv.style.margin = '10px 0';
+
+                const itemPrice = parseFloat(item.price.replace('₱', ''));
+                const itemTotal = itemPrice * item.quantity;
+
+                // Calculate final price with any discount applied
+                const discountedTotal = purchase.discountPercent > 0 
+                    ? itemTotal * (1 - purchase.discountPercent / 100) 
+                    : itemTotal;
+                
+                // Base order HTML without admin controls
+                let orderHTML = `
+                    <img src="${item.img}" alt="${item.name}" class="order-image">
+                    <div class="order-details">
+                        <h3>${item.name}</h3>
+                        <p>Quantity: ${item.quantity}</p>
+                        ${purchase.discountPercent > 0 
+                            ? `<p class="order-price"><span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₱${itemTotal.toFixed(2)}</span> <span style="color: #b1464a;">₱${discountedTotal.toFixed(2)}</span></p>` 
+                            : `<p class="order-price">₱${itemTotal.toFixed(2)}</p>`
+                        }
+
+                        <div class="order-actions">
+                            <button class="order-action-btn view-details-btn">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            ${purchase.orderStatus === 'Delivered' ? `
+                                <button class="order-action-btn buy-again-btn">
+                                    <i class="fas fa-redo"></i> Buy Again
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                orderDiv.innerHTML = orderHTML;
+
+                // Add event listeners
+                setTimeout(() => {
+                    const buyAgainBtn = orderDiv.querySelector('.buy-again-btn');
+                    if (buyAgainBtn) {
+                        buyAgainBtn.addEventListener('click', function() {
+                            addToCart(item);
+                        });
+                    }
+
+                    const viewDetailsBtn = orderDiv.querySelector('.view-details-btn');
+                    if (viewDetailsBtn) {
+                        viewDetailsBtn.addEventListener('click', function() {
+                            showOrderDetails(item, purchase, purchaseDate);
+                        });
+                    }
+                }, 0);
+
+                return orderDiv;
+            }
+
+            // Function to add item to cart again
+            function addToCart(item) {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                // Check if item already in cart
+                const existingItemIndex = cart.findIndex(cartItem => cartItem.name === item.name);
+
+                if (existingItemIndex !== -1) {
+                    // Update quantity if item exists
+                    cart[existingItemIndex].quantity += 1;
+                } else {
+                    // Add new item with quantity 1
+                    const newItem = { ...item, quantity: 1 };
+                    cart.push(newItem);
+                }
+
+                // Update localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // Update cart count
+                const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+                localStorage.setItem('cartCount', cartCount);
+
+                const cartLink = document.getElementById('cart-link');
+                if (cartLink) {
+                    cartLink.innerHTML = `CART <span class="cart-count">${cartCount}</span>`;
+                }
+
+                // Show notification
+                showHeaderNotification({
+                    title: 'Added to Cart',
+                    message: `${item.name} has been added to your cart`,
+                    type: 'success',
+                    icon: '🛒',
+                    duration: 3000
+                });
+            }
+
+            // Function to show order details
+            function showOrderDetails(item, purchase, purchaseDate) {
+                // Save the order details to localStorage so receipt modal can access it
+                localStorage.setItem('lastOrderDetails', JSON.stringify(purchase));
+
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'block';
+
+                const itemPrice = parseFloat(item.price.replace('₱', ''));
+                const itemTotal = itemPrice * item.quantity;
+
+                modal.innerHTML = `
+                    <div class="modal-content" style="width: 80%; max-width: 600px;">
+                        <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        <h2 style="color: #6b4f4f; margin-bottom: 20px;">Order Details</h2>
+
+                        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                            <img src="${item.img}" alt="${item.name}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <div>
+                                <h3 style="color: #b1464a; margin-bottom: 10px;">${item.name}</h3>
+                                <p style="margin: 5px 0;">Order Date: ${purchaseDate}</p>
+                                <p style="margin: 5px 0;">Order Status: <span style="color: #b1464a; font-weight: bold;">${purchase.orderStatus}</span></p>
+                                <p style="margin: 5px 0;">Quantity: ${item.quantity}</p>
+                                <p style="margin: 5px 0;">Item Price: ₱${(itemPrice).toFixed(2)} × ${item.quantity}</p>
+                                ${purchase.discountPercent > 0 ? 
+                                  `<p style="margin: 5px 0;"><span style="text-decoration: line-through;">Subtotal: ₱${itemTotal.toFixed(2)}</span></p>
+                                   <p style="margin: 5px 0; color: #4CAF50;">Discount: ${purchase.discountPercent}% off (-₱${(itemTotal * purchase.discountPercent / 100).toFixed(2)})</p>` 
+                                  : ''}
+                                <p style="margin: 5px 0; font-size: 18px; font-weight: bold; color: #b1464a;">Total: ₱${(itemTotal * (1 - (purchase.discountPercent || 0) / 100)).toFixed(2)}</p>
+                            </div>
+                        </div>
+
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                            <h4 style="color: #6b4f4f; margin-bottom: 10px;">Shipping Address</h4>
+                            <p style="margin: 5px 0;">${purchase.address || purchase.customerInfo?.address || 'No address information available'}</p>
+                        </div>
+
+                        <div style="text-align: right; margin-top: 30px;">
+                            <button onclick="showReceiptModal()" style="background: #b1464a; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-right: 10px;">View Receipt</button>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #f4e2d8; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-right: 10px;">Close</button>
+                            ${purchase.orderStatus === 'Delivered' ? `
+                                <button onclick="addToCartFromModal('${item.name}')" style="background: #b1464a; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">Buy Again</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+            }
+
+            // Global function to add to cart from modal
+            window.addToCartFromModal = function(itemName) {
+                const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+
+                // Find the item in purchase history
+                let foundItem = null;
+                purchaseHistory.forEach(purchase => {
+                    purchase.items.forEach(item => {
+                        if (item.name === itemName) {
+                            foundItem = item;
+                        }
+                    });
+                });
+
+                if (foundItem) {
+                    addToCart(foundItem);
+                    // Close the modal
+                    document.querySelector('.modal').remove();
+                }
+            };
+
+            // Welcome notification
+            setTimeout(() => {
+                showHeaderNotification({
+                    title: isAdmin ? 'Admin Order Management' : 'My Orders',
+                    message: isAdmin ? 'You can manage customer orders' : 'Track and manage all your orders in one place',
+                    type: 'info',
+                    icon: '📦',
+                    duration: 5000
+                });
+            }, 1000);
+        });
+        
+        // Function to update order status (admin only)
+        window.updateOrderStatus = function(index) {
+            const user = JSON.parse(localStorage.getItem('loggedInUser')) || { name: 'Guest' };
+            if (!user.isAdmin) return;
+            
+            let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+            if (purchaseHistory[index]) {
+                const currentStatus = purchaseHistory[index].orderStatus;
+                
+                // Prevent changing status if already processed
+                if (currentStatus === 'In Transit') {
+                    if (confirm(`Are you sure you want to mark this order as Delivered?`)) {
+                        // Disable all admin buttons to prevent double-clicking
+                        document.querySelectorAll('.admin-btn').forEach(btn => {
+                            btn.disabled = true;
+                            btn.style.opacity = '0.5';
+                            btn.style.cursor = 'not-allowed';
+                        });
+                        
+                        purchaseHistory[index].orderStatus = 'Delivered';
+                        purchaseHistory[index].deliveredDate = new Date().toISOString();
+                        localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+                        
+                        // Show notification
+                        showHeaderNotification({
+                            title: 'Order Updated',
+                            message: 'Order status changed to Delivered',
+                            type: 'success',
+                            icon: '✅',
+                            duration: 3000
+                        });
+                        
+                        // Reload the page to reflect changes
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                } else {
+                    showHeaderNotification({
+                        title: 'Action Not Allowed',
+                        message: `Cannot change status from ${currentStatus} to Delivered`,
+                        type: 'warning',
+                        icon: '⚠️',
+                        duration: 3000
+                    });
+                }
+            }
+        };
+        
+        // Function to mark orders as In Transit (admin only)
+        window.markAsInTransit = function(index) {
+            const user = JSON.parse(localStorage.getItem('loggedInUser')) || { name: 'Guest' };
+            if (!user.isAdmin) return;
+            
+            let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+            if (purchaseHistory[index]) {
+                const currentStatus = purchaseHistory[index].orderStatus;
+                
+                // Prevent changing status if not in Processing
+                if (currentStatus === 'Processing') {
+                    if (confirm(`Are you sure you want to mark this order as In Transit?`)) {
+                        // Disable all admin buttons to prevent double-clicking
+                        document.querySelectorAll('.admin-btn').forEach(btn => {
+                            btn.disabled = true;
+                            btn.style.opacity = '0.5';
+                            btn.style.cursor = 'not-allowed';
+                        });
+                        
+                        purchaseHistory[index].orderStatus = 'In Transit';
+                        purchaseHistory[index].shippedDate = new Date().toISOString();
+                        localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+                        
+                        // Show notification with animation
+                        const notification = document.createElement('div');
+                        notification.className = 'status-update-notification';
+                        notification.innerHTML = `
+                            <i class="fas fa-shipping-fast"></i> Order has been marked as In Transit
+                        `;
+                        document.body.appendChild(notification);
+                        
+                        // Remove notification after 3 seconds
+                        setTimeout(() => {
+                            notification.style.opacity = '0';
+                            setTimeout(() => {
+                                notification.remove();
+                            }, 300);
+                        }, 3000);
+                        
+                        // Reload the page to reflect changes
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                } else {
+                    showHeaderNotification({
+                        title: 'Action Not Allowed',
+                        message: `Cannot change status from ${currentStatus} to In Transit`,
+                        type: 'warning',
+                        icon: '⚠️',
+                        duration: 3000
+                    });
+                }
+            }
+        };
+        
+        // Function to reject an order (admin only)
+        window.rejectOrder = function(index) {
+            const user = JSON.parse(localStorage.getItem('loggedInUser')) || { name: 'Guest' };
+            if (!user.isAdmin) return;
+            
+            let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+            if (purchaseHistory[index]) {
+                const currentStatus = purchaseHistory[index].orderStatus;
+                
+                // Prevent cancelling already delivered orders
+                if (currentStatus !== 'Delivered' && currentStatus !== 'Cancelled') {
+                    if (confirm(`Are you sure you want to reject this order? This will mark it as Cancelled.`)) {
+                        // Disable all admin buttons to prevent double-clicking
+                        document.querySelectorAll('.admin-btn').forEach(btn => {
+                            btn.disabled = true;
+                            btn.style.opacity = '0.5';
+                            btn.style.cursor = 'not-allowed';
+                        });
+                        
+                        purchaseHistory[index].orderStatus = 'Cancelled';
+                        purchaseHistory[index].cancelledDate = new Date().toISOString();
+                        localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+                        
+                        // Show notification
+                        showHeaderNotification({
+                            title: 'Order Rejected',
+                            message: 'Order has been marked as Cancelled',
+                            type: 'error',
+                            icon: '❌',
+                            duration: 3000
+                        });
+                        
+                        // Reload the page to reflect changes
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                } else {
+                    showHeaderNotification({
+                        title: 'Action Not Allowed',
+                        message: `Cannot cancel an order that is already ${currentStatus}`,
+                        type: 'warning',
+                        icon: '⚠️',
+                        duration: 3000
+                    });
+                }
+            }
+        };
+
+        // Function to show receipt modal
+        window.showReceiptModal = function() {
+            const modal = document.getElementById('receipt-modal');
+            if (!modal) return; // Guard clause in case modal doesn't exist
+
+            modal.style.display = 'block';
+
+            // Get the last order details from localStorage
+            const orderDetails = JSON.parse(localStorage.getItem('lastOrderDetails'));
+            if (!orderDetails) return;
+
+            // Set date
+            const orderDate = new Date(orderDetails.date).toLocaleDateString('en-US', {
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('receipt-date').textContent = `Date: ${orderDate}`;
+
+            // Set shipping information
+            const customerInfo = orderDetails.customerInfo || {};
+            document.getElementById('receipt-name').textContent = `Name: ${customerInfo.name || 'N/A'}`;
+            document.getElementById('receipt-email').textContent = `Email: ${customerInfo.email || 'N/A'}`;
+            document.getElementById('receipt-phone').textContent = `Phone: ${customerInfo.phone || 'N/A'}`;
+            document.getElementById('receipt-address').textContent = `Address: ${customerInfo.address || orderDetails.address || 'N/A'}`;
+
+            // Set payment method
+            document.getElementById('receipt-payment-method').textContent = 
+                customerInfo.paymentMethod === 'cod' ? 'Cash on Delivery' : 'GCash';
+
+            // Set items
+            const itemsList = document.getElementById('receipt-items-list');
+            itemsList.innerHTML = '';
+
+            orderDetails.items.forEach(item => {
+                const priceValue = parseFloat(item.price.replace(/[^\d.]/g, ''));
+                const itemTotal = priceValue * (item.quantity || 1);
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'receipt-item';
+                itemElement.innerHTML = `
+                    <div class="receipt-item-left">
+                        <img src="${item.img}" alt="${item.name}">
+                        <div>
+                            <p>${item.name}</p>
+                            <p class="item-quantity">Qty: ${item.quantity || 1} x ₱${priceValue.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="receipt-item-right">
+                        <p>₱${itemTotal.toFixed(2)}</p>
+                    </div>
+                `;
+                itemsList.appendChild(itemElement);
+            });
+
+            // Set totals
+            document.getElementById('receipt-subtotal').textContent = `₱${orderDetails.subtotal?.toFixed(2) || orderDetails.total.toFixed(2)}`;
+
+            if (orderDetails.discount > 0) {
+                document.getElementById('receipt-discount-row').style.display = 'flex';
+                document.getElementById('receipt-discount').textContent = `-₱${orderDetails.discount.toFixed(2)} (${orderDetails.discountPercent}% off)`;
+            } else {
+                document.getElementById('receipt-discount-row').style.display = 'none';
+            }
+            document.getElementById('receipt-total').textContent = `₱${orderDetails.total.toFixed(2)}`;
+
+            // Print receipt functionality
+            document.getElementById('print-receipt-btn').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Save receipt as image
+            document.getElementById('save-receipt-btn').addEventListener('click', function() {
+                // Check if html2canvas is loaded
+                if (typeof html2canvas === 'function') {
+                    const receiptElement = document.getElementById('receipt-to-print');
+                    html2canvas(receiptElement).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = 'ClassCraft-Receipt.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    });
+                } else {
+                    alert('Image saving functionality is not available. Please try printing instead.');
+                }
+            });
+        };
+
+        // Function to close receipt modal
+        window.closeReceiptModal = function() {
+            const modal = document.getElementById('receipt-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+
+    <!-- Receipt Modal -->
+    <div id="receipt-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReceiptModal()">&times;</span>
+            <div id="receipt-to-print">
+                <h2>Class Craft Receipt</h2>
+                <p id="receipt-date"></p>
+                <p id="receipt-name"></p>
+                <p id="receipt-email"></p>
+                <p id="receipt-phone"></p>
+                <p id="receipt-address"></p>
+                <p>Payment Method: <span id="receipt-payment-method"></span></p>
+                <h3>Items:</h3>
+                <div id="receipt-items-list"></div>
+                <div>
+                    <p id="receipt-subtotal"></p>
+                    <div id="receipt-discount-row" style="display: none;">
+                        <p id="receipt-discount"></p>
+                    </div>
+                    <p><b>Total:</b> <span id="receipt-total"></span></p>
+                </div>
+                <button id="print-receipt-btn">Print Receipt</button>
+                <button id="save-receipt-btn">Save as Image</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

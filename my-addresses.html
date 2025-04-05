@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addresses - Class Craft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="address-styles.css">
+    <style>
+        /* Notification styles */
+        #header-notification {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: none; /* Initially hidden */
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+        }
+
+        #header-notification.success {
+            background-color: #4CAF50;
+        }
+
+        #header-notification.info {
+            background-color: #2196F3;
+        }
+
+        #header-notification.warning {
+            background-color: #FFC107;
+        }
+
+        #header-notification.error {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="Logop.png" alt="Logo" width="60" height="60" />
+        <div class="logo">Class Craft</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="index2.html">SHOP</a></li>
+                <li><a href="about.html">ABOUT US</a></li>
+                <li><a href="index4.html" id="cart-link">CART <span class="cart-count">0</span></a></li>
+                <li>
+                    <a href="dashboard.html">DASHBOARD</a>
+                </li>
+            </ul>
+        </nav>
+        <div id="header-notification"></div> </header>
+
+    <div class="address-container">
+        <div class="page-title">
+            <h1>My Addresses</h1>
+            <p>Manage your delivery locations</p>
+        </div>
+
+        <div class="address-content">
+            <div class="address-actions">
+                <button id="add-address-btn" class="action-btn">
+                    <i class="fas fa-plus"></i> Add New Address
+                </button>
+                <p class="address-limit-note">You can save up to 5 addresses</p>
+            </div>
+
+            <div class="saved-addresses" id="saved-addresses">
+                <!-- Addresses will be loaded here -->
+                <div class="empty-addresses" id="empty-addresses">
+                    <i class="fas fa-map-marker-alt empty-icon"></i>
+                    <h3>No addresses saved yet</h3>
+                    <p>Add a new address to get started</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Modal Template -->
+    <div id="address-modal-template" style="display: none;">
+        <div class="modal fade-in" id="address-modal">
+            <div class="modal-content slide-up">
+                <div class="modal-header">
+                    <h2 id="modal-title">Add New Address</h2>
+                    <span class="close" onclick="closeAddressModal()">&times;</span>
+                </div>
+                <div class="form-groups">
+                    <div class="form-group">
+                        <input type="text" id="address-label" placeholder=" ">
+                        <label for="address-label">Address Label (e.g., Home, Office)</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-line" required placeholder=" ">
+                        <label for="address-line">Address</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-barangay" required placeholder=" ">
+                        <label for="address-barangay">Barangay</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-city" required placeholder=" ">
+                        <label for="address-city">City/Municipality</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-postal" required placeholder=" ">
+                        <label for="address-postal">Postal Code</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-province" required placeholder=" ">
+                        <label for="address-province">Province</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="address-country" value="PHL" required placeholder=" ">
+                        <label for="address-country">Country</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="closeAddressModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="save-btn" id="save-address-btn">
+                        <i class="fas fa-check"></i> Save Address
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="address-script.js"></script>
+    <script src="header-notification.js"></script>
+    <script>
+        // Show notification when address is added
+        function showAddressAddedNotification() {
+            showHeaderNotification({
+                title: 'Address Added',
+                message: 'Your new address has been successfully added.',
+                type: 'success',
+                icon: '✓',
+                duration: 5000
+            });
+        }
+
+        // Show notification when address is deleted
+        function showAddressDeletedNotification() {
+            showHeaderNotification({
+                title: 'Address Deleted',
+                message: 'The address has been removed from your account.',
+                type: 'info',
+                icon: '🗑️',
+                duration: 4000
+            });
+        }
+
+        // Override address functions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hook into the save address functionality
+            const saveAddressButton = document.getElementById('save-address-btn');
+            if (saveAddressButton) {
+                const originalClick = saveAddressButton.onclick;
+                saveAddressButton.onclick = function(e) {
+                    const result = originalClick ? originalClick.call(this, e) : true;
+                    if (result !== false) {
+                        setTimeout(showAddressAddedNotification, 300);
+                    }
+                    return result;
+                };
+            }
+
+            // Show welcome notification
+            setTimeout(() => {
+                showHeaderNotification({
+                    title: 'Manage Your Addresses',
+                    message: 'Add, edit or remove your shipping addresses here.',
+                    type: 'info',
+                    icon: '📍',
+                    duration: 6000
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
